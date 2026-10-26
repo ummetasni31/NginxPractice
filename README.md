@@ -573,3 +573,4 @@ The installed Nginx accepted the base and advanced HTTP configurations' syntax, 
 It is documentation, not an installed Nginx deployment. Follow each experiment's commands and expected observations on your machine; do not treat these lab settings as a completed production configuration.
 # NginxPractice
 # NginxPractice
+# NginxPractice
