@@ -1,0 +1,15 @@
+
+spring:
+  application:
+    name: myapp
+  servlet:
+    multipart:
+      max-file-size: 1MB
+      max-request-size: 2MB
+
+server:
+  port: 8081
+
+logging:
+  level:
+    root: INFO

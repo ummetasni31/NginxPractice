@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nginx advanced lab</title>
+<style>
+  body { font: 18px system-ui; max-width: 760px; margin: 40px auto; padding: 0 20px; }
+  button, input { font: inherit; margin: 6px 0; }
+  pre { white-space: pre-wrap; background: #eee; padding: 16px; min-height: 50px; }
+</style>
+<h1>Nginx advanced lab</h1>
+<p>Open this page through Nginx at http://localhost:8090/.</p>
+<h2>WebSocket echo</h2>
+<label>Message <input id="message" value="Hello Nginx" maxlength="1000"></label>
+<button id="echo">Connect and send</button>
+<pre id="ws-output" aria-live="polite"></pre>
+<h2>Server-sent events</h2>
+<button id="events">Receive five events</button>
+<pre id="sse-output" aria-live="polite"></pre>
+<h2>Upload metadata</h2>
+<p>Choose a non-empty file up to 1 MiB. Its contents are not saved.</p>
+<form id="upload">
+  <label>File <input type="file" name="file" required></label>
+  <button>Upload</button>
+</form>
+<pre id="upload-output" aria-live="polite"></pre>
+<h2>Basic authentication</h2>
+<p><a href="/private/api/server1">Open protected API</a> (use your lab username/password).</p>
+<script>
+  const output = (id, text) => { document.getElementById(id).textContent = text; };
+  document.getElementById('echo').onclick = () => {
+    const button = document.getElementById('echo');
+    button.disabled = true;
+    output('ws-output', 'Connecting…');
+    const socket = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws/echo`);
+    socket.onopen = () => socket.send(document.getElementById('message').value);
+    socket.onmessage = event => { output('ws-output', event.data); socket.close(); };
+    socket.onerror = () => output('ws-output', 'Connection failed. Check the Java instances and Nginx error log.');
+    socket.onclose = () => { button.disabled = false; };
+  };
+  document.getElementById('events').onclick = () => {
+    const button = document.getElementById('events');
+    button.disabled = true;
+    output('sse-output', '');
+    const events = new EventSource('/api/events');
+    const stop = () => { events.close(); button.disabled = false; };
+    events.addEventListener('tick', event => {
+      document.getElementById('sse-output').textContent += event.data + '\n';
+      if (event.lastEventId === '5') stop();
+    });
+    events.onerror = () => { output('sse-output', 'Stream failed. Check Java and the Nginx logs.'); stop(); };
+  };
+  document.getElementById('upload').onsubmit = async event => {
+    event.preventDefault();
+    const button = event.target.querySelector('button');
+    button.disabled = true;
+    try {
+      const response = await fetch('/api/upload', { method: 'POST', body: new FormData(event.target) });
+      output('upload-output', `HTTP ${response.status}\n${await response.text()}`);
+    } catch (error) {
+      output('upload-output', error.message);
+    } finally {
+      button.disabled = false;
+    }
+  };
+</script>
+</html>
