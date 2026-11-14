@@ -571,7 +571,4 @@ The Java source and build configuration were inspected when writing this guide. 
 The installed Nginx accepted the base and advanced HTTP configurations' syntax, but full `-t` checks failed because this environment prohibits creating listening sockets (`Operation not permitted`). The stream module is not installed here, so the TCP config and end-to-end browser/curl experiments were not executed.
 
 It is documentation, not an installed Nginx deployment. Follow each experiment's commands and expected observations on your machine; do not treat these lab settings as a completed production configuration.
-# NginxPractice
-# NginxPractice
-# NginxPractice
-# NginxPractice
+
